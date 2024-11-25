@@ -1,7 +1,8 @@
 [org 0x0100]
-jmp start1
+
+	jmp startBitmap
+
 	;=====================================================================================================================================================================================================;
-	
 	SudokuLogo: dw 0x0001, 0x8000, 0x000c, 0x3000, 0x0fff, 0xfff0, 0x0000, 0x0000, 0xf4b1, 0xe924, 0x84a9, 0x2a24, 0x84a5, 0x2c24, 0xf4a5, 0x2c24, 0x14a5, 0x2a24, 0x14a9, 0x2924, 0xf7b1, 0xe8bd, 0x0000, 0x0000, 0x0fff, 0xfff0, 0x000c, 0x3000, 0x0001, 0x8000, 0x0000, 0x0000
 	; 24 starting x, 0 starting y, 32 columns in single Row
 
@@ -135,45 +136,6 @@ Printscore:
 		pop bp
 	ret
 
-; Printscore:
-;     push bp
-;     mov  bp, sp
-;     pushA
-    
-;     mov si, ScoreString2        ; Start at rightmost digit
-;     add si, 5                   ; Points to the last digit in the string
-;     mov cx, 6                   ; We have 6 digits to fill
-;     mov dx, [Score]             ; Load the score into DX
-;     mov bx, 10                  ; Dividing by 10 (decimal)
-
-; loopingPrintScore:
-;     div bx                      ; Divide DX by BX (quotient in AX, remainder in DX)
-;     add dl, 0x30                ; Convert remainder to ASCII
-;     mov byte [si], dl           ; Store the digit in the string
-;     dec si                      ; Move to the next digit position
-;     mov dx, ax                  ; Move the quotient back to DX for the next iteration
-;     dec cx                      ; Decrement digit counter
-;     cmp cx, 0                   ; Check if all digits are processed
-;     jnz loopingPrintScore       ; If not, repeat
-
-;     ; Cursor positioning
-;     mov dh, 0                   ; Row 0 (change as per your needs)
-;     mov dl, 41                  ; Column 41 (change as per your needs)
-;     mov bx, 0
-;     mov ah, 02h                 ; Set cursor position
-;     int 10h
-    
-;     ; Print the score
-;     mov ah, 0x0e                ; Teletype output
-;     mov si, ScoreString2        ; Point to the score string
-;     call PrintString            ; Print the score string
-    
-;     popA
-;     mov sp, bp
-;     pop bp
-;     ret
-	
-
 	;=====================================================================================================================================================================================================;
 
 	; bitmaps to be stored in little endian
@@ -244,30 +206,70 @@ Printscore:
 
 	;======================================================================================================================================================================================;
 	
-	notesForRow1: db 11100011b, 00000000b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 01010101b, 11111111b, 11111111b, 10000000b
-	notesForRow2: db 11111111b, 00110110b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b
-	notesForRow3: db 11111111b, 11111111b, 00001100b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b
-	notesForRow4: db 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 01000000b, 10101110b, 11111111b, 11111111b, 11111111b
-	notesForRow5: db 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 10011100b, 11111111b, 11111111b, 10110001b, 11111111b, 11111111b
-	notesForRow6: db 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 00000001b, 11111111b, 11111111b, 11111111b
-	notesForRow7: db 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 01010100b, 11111111b, 00100100b, 11111111b, 11111111b, 11111111b, 00000000b
-	notesForRow8: db 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b
-	notesForRow9: db 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b
+	notesForRow1: db 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b
+	notesForRow2: db 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b
+	notesForRow3: db 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b
+	notesForRow4: db 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b
+	notesForRow5: db 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b
+	notesForRow6: db 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b
+	notesForRow7: db 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b
+	notesForRow8: db 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b
+	notesForRow9: db 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b, 00000000b
+
+	; notesForRow1: db 11100011b, 00000000b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 01010101b, 11111111b, 11111111b, 10000000b
+	; notesForRow2: db 11111111b, 00110110b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b
+	; notesForRow3: db 11111111b, 11111111b, 00001100b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b
+	; notesForRow4: db 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 01000000b, 10101110b, 11111111b, 11111111b, 11111111b
+	; notesForRow5: db 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 10011100b, 11111111b, 11111111b, 10110001b, 11111111b, 11111111b
+	; notesForRow6: db 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 00000001b, 11111111b, 11111111b, 11111111b
+	; notesForRow7: db 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 01010100b, 11111111b, 00100100b, 11111111b, 11111111b, 11111111b, 00000000b
+	; notesForRow8: db 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b
+	; notesForRow9: db 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b, 11111111b
 	
 	notesArray: dw notesForRow1, notesForRow2, notesForRow3, notesForRow4, notesForRow5, notesForRow6, notesForRow7, notesForRow8, notesForRow9
 
 	;======================================================================================================================================================================================;
-	NumbersForRow1: dw 0,2,3,4,5,6,7,0,9
-	NumbersForRow2: dw 1,0,3,4,5,0,7,8,9
-	NumbersForRow3: dw 1,2,0,4,0,6,7,8,9
-	NumbersForRow4: dw 1,2,3,0,5,6,7,0,9
-	NumbersForRow5: dw 1,2,3,4,0,6,7,8,9
-	NumbersForRow6: dw 1,0,3,4,5,0,0,8,0
-	NumbersForRow7: dw 1,2,3,0,5,6,0,8,9
-	NumbersForRow8: dw 1,2,3,4,5,0,7,0,9
-	NumbersForRow9: dw 1,2,0,4,5,0,7,8,0
+	NumbersForRow1: dw 0,0,0,0,0,0,0,0,0
+	NumbersForRow2: dw 0,0,0,0,0,0,0,0,0
+	NumbersForRow3: dw 0,0,0,0,0,0,0,0,0
+	NumbersForRow4: dw 0,0,0,0,0,0,0,0,0
+	NumbersForRow5: dw 0,0,0,0,0,0,0,0,0
+	NumbersForRow6: dw 0,0,0,0,0,0,0,0,0
+	NumbersForRow7: dw 0,0,0,0,0,0,0,0,0
+	NumbersForRow8: dw 0,0,0,0,0,0,0,0,0
+	NumbersForRow9: dw 0,0,0,0,0,0,0,0,0
 
 	NumbersArray: dw NumbersForRow1, NumbersForRow2, NumbersForRow3, NumbersForRow4, NumbersForRow5, NumbersForRow6, NumbersForRow7, NumbersForRow8, NumbersForRow9
+
+	SolutionNumbersForRow1: dw 0,0,0,0,0,0,0,0,0
+	SolutionNumbersForRow2: dw 0,0,0,0,0,0,0,0,0
+	SolutionNumbersForRow3: dw 0,0,0,0,0,0,0,0,0
+	SolutionNumbersForRow4: dw 0,0,0,0,0,0,0,0,0
+	SolutionNumbersForRow5: dw 0,0,0,0,0,0,0,0,0
+	SolutionNumbersForRow6: dw 0,0,0,0,0,0,0,0,0
+	SolutionNumbersForRow7: dw 0,0,0,0,0,0,0,0,0
+	SolutionNumbersForRow8: dw 0,0,0,0,0,0,0,0,0
+	SolutionNumbersForRow9: dw 0,0,0,0,0,0,0,0,0
+
+	SolutionNumbersArray: dw SolutionNumbersForRow1, SolutionNumbersForRow2, SolutionNumbersForRow3, SolutionNumbersForRow4, SolutionNumbersForRow5, SolutionNumbersForRow6, SolutionNumbersForRow7, SolutionNumbersForRow8, SolutionNumbersForRow9
+
+	NumbersUserCantEditForRow1: dw 0,0,0,0,0,0,0,0,0			; the numbers which will be alr present when the game starts 
+	NumbersUserCantEditForRow2: dw 0,0,0,0,0,0,0,0,0
+	NumbersUserCantEditForRow3: dw 0,0,0,0,0,0,0,0,0
+	NumbersUserCantEditForRow4: dw 0,0,0,0,0,0,0,0,0
+	NumbersUserCantEditForRow5: dw 0,0,0,0,0,0,0,0,0
+	NumbersUserCantEditForRow6: dw 0,0,0,0,0,0,0,0,0
+	NumbersUserCantEditForRow7: dw 0,0,0,0,0,0,0,0,0
+	NumbersUserCantEditForRow8: dw 0,0,0,0,0,0,0,0,0
+	NumbersUserCantEditForRow9: dw 0,0,0,0,0,0,0,0,0
+
+	NumbersUserCantEditArray: dw NumbersUserCantEditForRow1, NumbersUserCantEditForRow2, NumbersUserCantEditForRow3, NumbersUserCantEditForRow4, NumbersUserCantEditForRow5, NumbersUserCantEditForRow6, NumbersUserCantEditForRow7, NumbersUserCantEditForRow8, NumbersUserCantEditForRow9
+
+	currentRow: db 0
+	currentCol: db 0
+
+	SPBeforeGeneration: dw 0				; will be used if i do random board generation
+	OriginalISRforINT9: dw 0, 0
 
 	;======================================================================================================================================================================================;
 	UndoButton:   dw 0x0fff, 0xfff0, 0x1fff, 0xfff8, 0x3000, 0x000c, 0x6000, 0x0006, 0xc000, 0x0003, 0xc000, 0x0003, 0xc002, 0x0003, 0xc006, 0x0003, 0xc00e, 0x0003, 0xc01e, 0x0003, 0xc03f, 0xf803, 0xc07f, 0xfc03, 0xc03e, 0x0e03, 0xc00e, 0x0703, 0xc006, 0x0303, 0xc002, 0x0303, 0xc000, 0x0303, 0xc000, 0x0303, 0xc000, 0x0303, 0xc000, 0x0303, 0xc000, 0x0603, 0xc000, 0x0403, 0xc007, 0xfc03, 0xc007, 0xf803, 0xc000, 0x0003, 0xc000, 0x0003, 0xc000, 0x0003, 0xc000, 0x0003, 0x6000, 0x0006, 0x3000, 0x000c, 0x1fff, 0xfff8, 0x0fff, 0xfff0
@@ -281,7 +283,7 @@ Printscore:
 
 	;======================================================================================================================================================================================;
 
-	LinesPixelCount: db 0, 1, 1, 4, 1, 1, 4, 1, 1 ; 0 for first on purpose, warrna 5 h 
+	LinesPixelCount: dw 4, 5, 6, 9,10, 11, 14, 15, 16 ;0, 1, 1, 4, 1, 1, 4, 1, 1 ; 0 for first on purpose, warrna 5 h 
 
 
 	topOfBoardStart:  db 'Mistakes: 0', 1
@@ -320,7 +322,7 @@ ret
 
 
 
-PrintString:	
+PrintString:		; give array in si
 	push cx
 	push si
 	push ax
@@ -408,6 +410,5 @@ drawBitMap: ; -- 4 color to print, 6 number to print, 8 size of bitmap y, 10 siz
 		pop bp
 ret 14
 
-start1:
-    mov ax, 0x4c00
-    int 21h
+
+startBitmap:

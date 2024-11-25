@@ -1,11 +1,57 @@
 [org 0x0100]
 
-	jmp start
+	jmp startDrawMiddle
 	
-	%include "Bitmaps.asm"
 	;======================================================================================================================================;
+	drawVertical: ; bp + 4 -- counter, bp + 6 --- y, bp + 8 --- x, bp + 10 --- color
+		push bp
+		mov  bp, sp
+		sub  sp, 2         ;space for counter
+		pushA
+		mov  ah, 0x0c
+		mov  si, [bp + 4]  ; counter
+		mov  di, 0
+		mov  cx, [bp + 8]
+		mov  dx, [bp + 6]
+		mov  bh, 0
+		mov  al, [bp + 10] ; color
+
+		loopDrawVertical:
+			int 10h
+			inc dx  ;increment y axis
+			dec si  ;decrement counter
+		jnz loopDrawVertical
+
+		popA
+		mov sp, bp
+		pop bp
+	ret 8
+
+	drawHorizontal: ; counter [bp + 4] --- y [bp + 6] --- x [bp + 4]
+		push bp
+		mov  bp, sp
+		sub  sp, 2         ;space for counter
+		pushA
+		mov  ah, 0x0c
+		mov  si, [bp + 4]  ; counter
+		mov  cx, [bp + 8]  ;x
+		mov  dx, [bp + 6]  ;y
+		mov  bh, 0         ;page number
+		mov  al, [bp + 10] ;color
+
+		loopDrawHorizontal:
+			int 10h
+			inc cx  ;increment x axis
+			dec si  ;decrement counter
+		jnz loopDrawHorizontal
+		popA
+		mov sp, bp
+		pop bp
+	ret 8
+
+
 	;======================================================================================================================================;
-NextRowInDrawingNumbers:
+NextRowInDrawingNumbers:			; it is a helper function
 	mov di, 0
 	add bx, 2
 setSIInDrawingNumbers:
@@ -26,7 +72,9 @@ drawNumbersInGrid:
 	mov cx, 0	; row iterations 
 	mov dx, 0	; column iterations
 	mov bx, 0 	; row no / offset for NumbersArray
+
 	mov si, [NumbersArray]
+	; mov si, [SolutionNumbersArray]
 	mov di, 0	;number to read in the [NumbersArray];
 
 	call setSIInDrawingNumbers
@@ -84,8 +132,9 @@ drawNumbersInGrid:
 	mov sp, bp
 	pop bp
 ret 
+
 ;=====================================================================================================================================================================;
-NextRowInDrawingNotes:
+NextRowInDrawingNotes:			; it is a helper function
 	mov di, 0
 	add bx, 2
 setSIInDrawNotes:
@@ -180,52 +229,6 @@ drawNotes:
 ret 
 	
 	;======================================================================================================================================;
-	
-	drawVertical: ; bp + 4 -- counter, bp + 6 --- y, bp + 8 --- x, bp + 10 --- color
-		push bp
-		mov  bp, sp
-		sub  sp, 2         ;space for counter
-		pushA
-		mov  ah, 0x0c
-		mov  si, [bp + 4]  ; counter
-		mov  di, 0
-		mov  cx, [bp + 8]
-		mov  dx, [bp + 6]
-		mov  bh, 0
-		mov  al, [bp + 10] ; color
-
-		loopDrawVertical:
-			int 10h
-			inc dx  ;increment y axis
-			dec si  ;decrement counter
-		jnz loopDrawVertical
-
-		popA
-		mov sp, bp
-		pop bp
-	ret 8
-
-	drawHorizontal: ; counter [bp + 4] --- y [bp + 6] --- x [bp + 4]
-		push bp
-		mov  bp, sp
-		sub  sp, 2         ;space for counter
-		pushA
-		mov  ah, 0x0c
-		mov  si, [bp + 4]  ; counter
-		mov  cx, [bp + 8]  ;x
-		mov  dx, [bp + 6]  ;y
-		mov  bh, 0         ;page number
-		mov  al, [bp + 10] ;color
-
-		loopDrawHorizontal:
-			int 10h
-			inc cx  ;increment x axis
-			dec si  ;decrement counter
-		jnz loopDrawHorizontal
-		popA
-		mov sp, bp
-		pop bp
-	ret 8
 ;===============================================================================================================================================================================================;
 
 DrawScoreCard: 
@@ -310,7 +313,7 @@ ret 6
 		mov ax,            [bp + 4]
 		mov bl,            9
 		mul bl
-		add ax,            23       ;total no of pixels to printc
+		add ax,            22       ;total no of pixels to printc
 		
 		jmp drawAgain
 		
@@ -318,8 +321,10 @@ ret 6
 			inc di
 			inc cx
 			inc dx
-			cmp di, 4
+			cmp di, 5
 		jnz drawAgain
+			dec cx
+			dec dx
 			mov di, 0
 		jmp iterateNext
 		
@@ -329,16 +334,18 @@ ret 6
 			inc dx
 			cmp di, 3
 		jnz drawAgain
+			dec cx
+			dec dx
 			mov di, 0
 		jmp iterateNext
 		
 		drawAgain:
-			push word 3        ; color 3
+			push word 8       ; color 3
 			push word [bp - 4]  ;x
 			push dx             ;y
 			push ax             ;pxl count
 			call drawHorizontal
-			push word 3
+			push word 8
 			push cx
 			push word [bp - 2]
 			push ax
@@ -366,7 +373,7 @@ ret 6
 		mov sp, bp
 		pop bp
 		
-	ret 
+	ret 6
 ;==========================================================================================================================================================================================================================;
 
 DrawLeftSideButtons:
@@ -497,31 +504,4 @@ ret
 
 ;==========================================================================================================================================================================================================================;
 
-	start:
-		mov ax, 0x12
-		int 10h
-		mov ah, 0x0b
-		mov bh, 00h
-		mov bl, 0		;3, 7
-		int 10h
-
-		push word 50  ;x
-		push word 145 ;y
-		push word 36  ;size
-		call DrawGrid
-		
-		push word 0
-		push word 145
-		push word 50
-		call drawBoardTop
-
-		call drawNotes
-
-		call drawNumbersInGrid
-
-		call DrawLeftSideButtons
-		call DrawRightSideButton
-		call DrawBottomNumbers
-		call DrawScoreCard
-		mov ax, 0x4c00
-	int 21h
+startDrawMiddle:
