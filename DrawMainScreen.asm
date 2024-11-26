@@ -51,87 +51,152 @@
 
 
 	;======================================================================================================================================;
-NextRowInDrawingNumbers:			; it is a helper function
-	mov di, 0
-	add bx, 2
-setSIInDrawingNumbers:
-	mov si, [NumbersArray + bx]
-	add si, di
-	mov si, [si]
-	add di, 2
+; NextRowInDrawingNumbers:			; it is a helper function
+; 	mov di, 0
+; 	add bx, 2
+; setSIInDrawingNumbers:
+; 	mov si, [NumbersArray + bx]
+; 	add si, di
+; 	mov si, [si]
+; 	add di, 2
+; ret
+
+; drawNumbersInGrid:
+; 	push bp
+; 	mov bp, sp
+; 	sub sp, 4
+; 	pushA		
+; 	mov word [bp - 2], 152	;x-cordinate of grid + 7
+; 	mov word [bp - 4], 57 	;y-cordinate of grid + 7
+
+; 	mov cx, 0	; row iterations 
+; 	mov dx, 0	; column iterations
+; 	mov bx, 0 	; row no / offset for NumbersArray
+
+; 	mov si, [NumbersArray]
+; 	; mov si, [SolutionNumbersArray]
+; 	mov di, 0	;number to read in the [NumbersArray];
+
+; 	call setSIInDrawingNumbers
+
+; 	loopingDrawingGridNumbers:
+; 		cmp si, 0
+; 	jz skipPrintInDrawingNumber
+
+; 		push word 36
+; 		push word 36
+; 		push word 5			; color
+; 		push word [bp - 2]	; x - coordinate
+; 		push word [bp - 4]	; y - coordinate
+; 		call ClearABox
+
+; 		push word NumbersBitmaps
+; 		push word [bp - 2]
+; 		push word [bp - 4]
+; 		push word 32
+; 		push word 32
+; 		push word si
+; 		push word 15
+; 		call drawBitMap
+; 	skipPrintInDrawingNumber:
+; 		call setSIInDrawingNumbers
+; 		add word [bp - 2], 37
+; 		inc dx
+; 			cmp dx, 3
+; 		jnz DxIsNotThreeInDrawingNotes
+; 			add word [bp - 2], 3
+; 		DxIsNotThreeInDrawingNotes:
+; 			cmp dx, 6
+; 		jnz DxisNotSixInDrawingNotes
+; 			add word [bp - 2], 3
+; 		DxisNotSixInDrawingNotes:
+; 			cmp dx, 9
+; 		jnz IfDxIsNotNineInDrawingNumbers
+; 			mov dx, 0
+; 			mov word [bp - 2], 152
+; 			add word [bp - 4], 37
+; 			call NextRowInDrawingNumbers
+; 			inc cx
+; 			cmp cx, 3
+; 		jnz CxIsNotThreeInDrawingNotes
+; 			add word [bp - 4], 3
+; 		CxIsNotThreeInDrawingNotes:
+; 			cmp cx, 6
+; 		jnz CxIsNotSixInDrawingNotes
+; 			add word [bp - 4], 3
+; 		CxIsNotSixInDrawingNotes:
+; 			cmp cx, 9
+; 			jz ExitDrawingNumbers
+; 		IfDxIsNotNineInDrawingNumbers:
+; 			jmp loopingDrawingGridNumbers
+; 	ExitDrawingNumbers:
+
+; 	popA
+; 	mov sp, bp
+; 	pop bp
+; ret 
+
+DrawNumberAtPosition:		;give Row in dh, col in dl, number to print in ax, bg color in bx, number color in cx
+	push dx
+	push ax
+	push bx
+	push cx
+	push ax
+		call pixelCalculatorFromIndex
+
+			add ax, 1
+			add dx, 1
+			push word 36		;size x
+			push word 36		;size y
+			push word bx		; color
+			push word ax 		; x coordinate
+			push word dx		; y coordinate
+			call ClearABox
+
+			add dx, 2
+			add ax, 2
+
+			pop bx
+			push NumbersBitmaps
+			push ax
+			push dx
+			push word 32
+			push word 32
+			push word bx
+			push word cx
+			call drawBitMap
+
+	pop cx
+	pop bx
+	pop ax
+	pop dx
 ret
 
 drawNumbersInGrid:
-	push bp
-	mov bp, sp
-	sub sp, 4
-	pushA		
-	mov word [bp - 2], 152	;x-cordinate of grid + 7
-	mov word [bp - 4], 57 	;y-cordinate of grid + 7
+	pushA
+		xor dx, dx
+		mov si, NumbersForRow1
+		mov cx, 15		; number color to print
+		mov bx, 7		; bg color 
+		getValuesInDrawingNumbers:
+			call returnValueFromBoard
 
-	mov cx, 0	; row iterations 
-	mov dx, 0	; column iterations
-	mov bx, 0 	; row no / offset for NumbersArray
+			cmp ax, 0
+			jz skipPrintingInDrawingNumbers
 
-	mov si, [NumbersArray]
-	; mov si, [SolutionNumbersArray]
-	mov di, 0	;number to read in the [NumbersArray];
-
-	call setSIInDrawingNumbers
-
-	loopingDrawingGridNumbers:
-		cmp si, 0
-	jz skipPrintInDrawingNumber
-
-		push word [bp - 2]	; x - coordinate
-		push word [bp - 4]	; y - coordinate
-		call ClearABox
-
-		push word NumbersBitmaps
-		push word [bp - 2]
-		push word [bp - 4]
-		push word 32
-		push word 32
-		push word si
-		push word 15
-		call drawBitMap
-	skipPrintInDrawingNumber:
-		call setSIInDrawingNumbers
-		add word [bp - 2], 37
-		inc dx
-			cmp dx, 3
-		jnz DxIsNotThreeInDrawingNotes
-			add word [bp - 2], 3
-		DxIsNotThreeInDrawingNotes:
-			cmp dx, 6
-		jnz DxisNotSixInDrawingNotes
-			add word [bp - 2], 3
-		DxisNotSixInDrawingNotes:
-			cmp dx, 9
-		jnz IfDxIsNotNineInDrawingNumbers
-			mov dx, 0
-			mov word [bp - 2], 152
-			add word [bp - 4], 37
-			call NextRowInDrawingNumbers
-			inc cx
-			cmp cx, 3
-		jnz CxIsNotThreeInDrawingNotes
-			add word [bp - 4], 3
-		CxIsNotThreeInDrawingNotes:
-			cmp cx, 6
-		jnz CxIsNotSixInDrawingNotes
-			add word [bp - 4], 3
-		CxIsNotSixInDrawingNotes:
-			cmp cx, 9
-			jz ExitDrawingNumbers
-		IfDxIsNotNineInDrawingNumbers:
-			jmp loopingDrawingGridNumbers
-	ExitDrawingNumbers:
+				call DrawNumberAtPosition
+				
+		skipPrintingInDrawingNumbers:
+				inc dl
+				cmp dl, 9
+			jnz getValuesInDrawingNumbers
+				mov dl, 0
+				inc dh
+				cmp dh, 9
+			jnz getValuesInDrawingNumbers
 
 	popA
-	mov sp, bp
-	pop bp
-ret 
+ret
 
 ;=====================================================================================================================================================================;
 NextRowInDrawingNotes:			; it is a helper function
@@ -170,7 +235,7 @@ drawNotes:
 			push word 8        ; size of bitmap x
 			push word 8        ; size of bitmap y
 			push cx
-			push word 11       ; color of bitmap
+			push word 11      ;11 ; color of bitmap
 			call drawBitMap
 		skipPrintInDrawingNotes:
 			add word [bp - 2], 11
@@ -448,12 +513,22 @@ pushA
 		mov ax, [di]
 		add ax, 40
 
+		cmp word [bx], 0
+		jnz FreqIsNot0
+
+			mov dx, 10
+			jmp justDontHaveALableToNameThisJump
+		FreqIsNot0:
+
+			mov dx, [bx]		
+
+		justDontHaveALableToNameThisJump:
 		push word bitMaps
 		push word [si]
 		push word ax
 		push word 8
 		push word 8
-		push word [bx]
+		push word dx
 		push word 15
 		call drawBitMap
 		inc cx

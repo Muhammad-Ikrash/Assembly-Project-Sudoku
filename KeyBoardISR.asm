@@ -6,69 +6,226 @@ customISRforINT9ForNavigationOnBoard:
 pushA
 	in al, 0x60
 	mov bl, al
-	forJumpingIfNumberIsNotEditable:
+
+	CheckingInput:
+
+		cmp al, 1
+		jle itWasADirection			
+
+		cmp al, 0x0b
+		jge itWasADirection			
+
+		mov dh, [currentRow]
+		mov dl, [currentCol]
+		sub al, 1
+
+		call validateAndPrintNumber
+
+	jmp itWasANumber	
+
+	itWasADirection:
+
+		mov bl, al
+		call getToNextPossibleIndex
+
+	
+	itWasANumber:
+
+	mov al, 0x20
+	out 0x20, al
+
+	popA
+iret
+
+getToNextPossibleIndex:		; give the scan code of movement in al
+push ax
+push dx
+push si
+push bx
+
+	mov bl, al
+
+	forJumpingIfNumberIsNotEditable1:
 		mov al, bl
 		cmp al, 0x48		;up
-		jnz checkLeft
+		jnz checkLeft1
 			dec byte [currentRow]
 			cmp byte [currentRow], -1
-			jnz skipMovingRowToLast
+			jnz skipMovingRowToLast1
 				mov byte [currentRow], 8 
-			skipMovingRowToLast:
-				jmp exitChecksInNavigation
+				dec byte [currentCol]
+				cmp byte [currentCol], -1
+				jnz skipMovingRowToLast1
+					mov byte [currentCol], 8			
+
+			skipMovingRowToLast1:
+				jmp exitChecksInNavigation1
 
 
-		checkLeft:
+		checkLeft1:
 		cmp al, 0x4b 		;left
-		jnz checkDown
+		jnz checkDown1
 			dec byte [currentCol]
 			cmp byte [currentCol], -1
-			jnz skipMovingColToLast
+			jnz skipMovingColToLast1
 				mov byte [currentCol], 8
-			skipMovingColToLast:
-				jmp exitChecksInNavigation
+				dec byte [currentRow]
+				cmp byte [currentRow], -1
+				jnz skipMovingColToLast1
+					mov byte [currentRow], 8
+
+			skipMovingColToLast1:
+				jmp exitChecksInNavigation1
 
 
-		checkDown:
+		checkDown1:
 		cmp al, 0x50		;down
-		jnz checkRight
+		jnz checkRight1
 			inc byte [currentRow]
 			cmp byte [currentRow], 9
-			jnz skipMovingRowToStart
+			jnz skipMovingRowToStart1
 				mov byte [currentRow], 0
-			skipMovingRowToStart:
-				jmp exitChecksInNavigation
+				inc byte [currentCol]
+				cmp byte [currentCol], 9
+				jnz skipMovingRowToStart1
+					mov byte [currentCol], 0
 
+			skipMovingRowToStart1:
+				jmp exitChecksInNavigation1
 
-		checkRight:
+		checkRight1:
 		cmp al, 0x4d		;right
-		jnz exitChecksInNavigation
+		jnz exitChecksInNavigation1
 			inc byte [currentCol]
 			cmp byte [currentCol], 9
-			jnz exitChecksInNavigation
+			jnz exitChecksInNavigation1
 				mov byte [currentCol], 0
-		exitChecksInNavigation:
+				inc byte [currentRow]
+				cmp byte [currentRow], 9
+				jnz exitChecksInNavigation1
+					mov byte [currentRow], 0
+
+
+		exitChecksInNavigation1:
 		
 	mov dh, [currentRow]
 	mov dl, [currentCol]
 	mov si, NumbersUserCantEditForRow1
 	call returnValueFromBoard
 	cmp ax, 1
-	jz forJumpingIfNumberIsNotEditable
+	jz forJumpingIfNumberIsNotEditable1
 
-	; call PrintOnScreenTesting
 	call DrawNavigationBox
 
-	mov al, 0x20
-	out 0x20, al
-	; call far [cs:OriginalISRforINT9]
+pop bx
+pop si
+pop dx
+pop ax
+ret
+
+updateSpecificFreq:			; give the number in ax whose freq is to be increased 
+	pushA
+
+		mov bx, ax
+		dec bx
+		add bx, bx
+		inc word [FrequencyArray + bx]		; inc the freq 
+		mov cx, [FrequencyArray + bx]
+
+		mov ah, 0
+		dec al
+		xor dx, dx
+		mov bx, 3
+		div bx
+		
+		xchg ax, dx
+		mov bx, dx
+		add bx, bx
+		mov dx, [FrequencyYCoordinate + bx]
+
+		mov bx, ax
+		add bx, bx
+		mov ax, [FrequencyXCoordinate + bx]
+
+		add dx, 40
+
+		push word 8
+		push word 8
+		push word 0
+		push word ax
+		push word dx
+		call ClearABox
+
+		push word bitMaps
+		push word ax
+		push word dx
+		push word 8
+		push word 8
+		push word cx
+		push word 15
+		call drawBitMap
+
 	popA
-iret
+ret
+
+validateAndPrintNumber:		; number in ax, dh -- row, dl -- col
+	push bp
+	mov bp, sp
+	push dx
+	push ax
+	push bx
+
+		mov si, SolutionNumbersForRow1
+		push ax
+		call returnValueFromBoard
+
+		pop bx
+		cmp ax, bx
+		mov ax, bx		; returning the value back in ax which was pressed 
+		jnz ItsWrongInput
+
+			mov bx, 7			; background fill color
+			mov cx, 15			; foreground color
+			call DrawNumberAtPosition
+
+			dec word [ValuesLeftInIndexes]		; dec values left to fill
+
+			call updateSpecificFreq
+
+			mov dx, [bp - 2]
+
+			mov si, NumbersUserCantEditForRow1
+			mov ax, 1
+			call enterValueAtBoard
+
+			mov al, 0x4d
+			call getToNextPossibleIndex
+
+			jmp exitInputValidation
+
+		ItsWrongInput:
+			mov bx, 7			
+			mov cx, 12
+			call DrawNumberAtPosition
+			
+			; inc mistake here ==============================================;
+
+
+			exitInputValidation:
+
+	pop bx
+	pop dx
+	pop ax
+	mov sp, bp
+	pop bp
+ret
 
 HookcustomISRforINT9ForNavigationOnBoard:
 
 	push es
     push ax
+	push dx
+
     xor  ax, ax
     mov  es, ax
 
@@ -77,6 +234,10 @@ HookcustomISRforINT9ForNavigationOnBoard:
 		mov [es: 9 * 4 + 2],  cs
     sti
 
+	xor dx, dx
+	call DrawNavigationBox
+
+	pop dx
     pop ax
 	pop es
 
@@ -116,7 +277,7 @@ PrintOnScreenTesting:
 	popA
 ret
 
-pixelCalculatorFromIndex:
+pixelCalculatorFromIndex:		; dh -- row, dl -- col, will return x pixel in ax, y pixel in dx
 	push bx
 	push cx
 
@@ -162,33 +323,6 @@ DrawNavigationBox:	; give new row/col in dh/dl
 
 	call pixelCalculatorFromIndex
 
-	; xchg dh, dl
-	; mov cx, dx
-	; mov dx, 0
-	; mov ax, 0
-	; mov al, cl		; col pixel calculation
-	; mov bx, 36		
-	; mul bx
-	; add ax, 50
-	
-	; push ax
-
-	; mov dx, 0
-	; mov ax, 0
-	; mov al, ch
-	; mul bx
-	; add ax, 145		; row pixel calculation
-	
-	; pop dx
-
-	; mov bx, 0
-	; mov bl, cl
-	; add bl, bl
-	; add dx, [LinesPixelCount + bx]
-	; mov bl, ch
-	; add bl, bl
-	; add ax, [LinesPixelCount + bx]
-	
 		push word 11        ; color 
 		push ax  			;x
 		push dx             ;y
@@ -221,7 +355,4 @@ DrawNavigationBox:	; give new row/col in dh/dl
 ret
 
 startINT9:
-	; call clrScreen
-	; call PrintOnScreenTesting
-	; call HookcustomISRforINT9ForNavigationOnBoard
-    ; jmp $
+

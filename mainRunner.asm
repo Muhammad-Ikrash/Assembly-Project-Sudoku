@@ -23,10 +23,6 @@ ret
 DrawTheMiddleScreen:
 		mov ax, 0x12
 		int 10h
-		mov ah, 0x0b
-		mov bh, 00h
-		mov bl, 0		;3, 7
-		int 10h
 
 		call GenerateRandomBoard
 		call FillRandomBasedOnDifficulty
@@ -37,14 +33,14 @@ DrawTheMiddleScreen:
 		call DrawGrid
 		
 		push word 0
-		push word 145
+		push word 145	
 		push word 50
 		call drawBoardTop
 
 		call drawNotes
 
 		call drawNumbersInGrid
-
+		
 		call DrawLeftSideButtons
 		call DrawRightSideButton
 		call DrawBottomNumbers

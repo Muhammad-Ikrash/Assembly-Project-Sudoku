@@ -2,8 +2,6 @@
 jmp                   startNavigation
 ;=========================;
 
-; %include "Bitmaps.asm"
-
 returnValueFromBoard:                 ; dh --- row , dl --- col, si --- row 1 of the array to use   			will return value in ax
 	push bx
 	push dx
@@ -21,8 +19,6 @@ returnValueFromBoard:                 ; dh --- row , dl --- col, si --- row 1 of
 	pop dx
 	pop bx
 ret
-
-
 
 enterValueAtBoard:    ;dh --- row , dl --- col, si --- row 1 of the array to use , value to set in ax 
 push               bx
@@ -42,11 +38,12 @@ push               ax ; will use late to retrieve value
 	pop ax            ; value retreived 
 	mov [si + bx], ax
 
-pop                  ax
-pop                  cx
-pop                  dx
-pop                  bx
+    pop                  ax
+    pop                  cx
+    pop                  dx
+    pop                  bx
 ret
+
 
 IsInsertibleAtIndex:    ; dh --- row, dl --- col, cx --- number to check, will return 1 in ax if it is insertable           push array to use in bp + 4
     push bp
@@ -197,7 +194,7 @@ read_tsc:
 
 RET 4
 
-GenerateRandomBoard:
+GenerateRandomBoard:            ; this is the wrapper function
     pushA
 
         mov byte [currentRow], 0
@@ -230,19 +227,17 @@ GenerateRandomBoard:
 
         mov [SPBeforeGeneration], sp
 
-        ; call printBoard
-
         call RandomBoardGeneration
 
         RandomBoardGenerationComplete:
-            ; call FillRandomBasedOnDifficulty
+            
             mov sp,                [SPBeforeGeneration]
             mov byte [currentCol], 0
             mov byte [currentRow], 0
     popA
 ret
 
-RandomBoardGeneration:
+RandomBoardGeneration:          ; this is the recursive function
     pushA
 
 
@@ -272,7 +267,7 @@ RandomBoardGeneration:
             mov  ax, cx
             call enterValueAtBoard
             inc  byte [currentCol]
-            call printBoard            ; just for testing
+
             call RandomBoardGeneration
             dec  byte [currentCol]
 
@@ -305,7 +300,7 @@ IndexRestore :  db           0, 0,  0, 1,  0, 2,  0, 3,  0, 4,  0, 5,  0, 6,  0,
         db                   7, 0,  7, 1,  7, 2,  7, 3,  7, 4,  7, 5,  7, 6,  7, 7,  7, 8
         db                   8, 0,  8, 1,  8, 2,  8, 3,  8, 4,  8, 5,  8, 6,  8, 7,  8, 8
 
-ValueFromDifficulty: dw 20
+ValueFromDifficulty: dw 50
 ValuesLeftInIndexes: dw 80
 
 FillRandomBasedOnDifficulty:
@@ -345,27 +340,15 @@ FillRandomBasedOnDifficulty:
         rep movsb
 
         pop cx
-
-        ; push word 0
-        ; push word 1
-        ; push word 9
-        ; call rand
-        ; pop  bx
-        ; mov  dh, bl
-        ; push word 0
-        ; push word 1
-        ; push word 9
-        ; call rand
-        ; pop  bx
-        ; mov  dl, bl
-
-        ; mov si, NumbersForRow1
-        ; call returnValueFromBoard
-        ; cmp ax, 0
-        ; jz GenerateANumberAgain
             
             mov  si, SolutionNumbersForRow1
             call returnValueFromBoard
+
+            mov bx, ax              ; just for inc freq 
+            dec bx
+            add bx, bx
+            inc word [FrequencyArray + bx]
+
             mov  si, NumbersForRow1
             call enterValueAtBoard
             mov  si, NumbersUserCantEditForRow1
@@ -377,50 +360,5 @@ FillRandomBasedOnDifficulty:
     popA
 ret
 
-printBoard: ; just for testing
-    pushA
-
-        mov ax, 0xb800
-        mov es, ax
-        mov di, 0
-
-        xor dx, dx
-        mov si, SolutionNumbersForRow1
-
-    getValueAgain:
-        call returnValueFromBoard
-        mov  ah,           0x07
-        add  al,           0x30
-        mov  word [es:di], ax
-        add  di,           2
-
-        inc dl
-        cmp dl, 9
-        jnz getValueAgain
-        mov dl, 0
-        sub di, 18
-        add di, 160
-        inc dh
-        cmp dh, 9
-        jnz getValueAgain
-
-    popA
-ret
 
 startNavigation:
-
-    ; call printBoard
-;     xor ax, ax
-;     int 16h
-
-;     call GenerateRandomBoard
-;     ; call RandomBoardGeneration
-;     call FillRandomBasedOnDifficulty
-
-;     mov ax, 0xb800
-;     mov di, 2000
-;     mov es, ax
-;     mov word [es:di], 0x072A
-
-; mov ax, 0x4c00 
-; int 21h

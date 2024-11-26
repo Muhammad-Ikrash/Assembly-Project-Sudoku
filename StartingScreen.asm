@@ -2,8 +2,6 @@
 
 jmp startStarting
 
-; %include "Bitmaps.asm"
-
 drawStarting:
     pushA
 
@@ -22,12 +20,12 @@ drawStarting:
     add di, 2
     loop loopingPrintingStart
     ;==================================;
-    mov ah, 10001111b
-    mov al, 174
-    mov word [es:di], ax
-    mov di, 2948
-    mov al, 175
-    mov word [es:di], ax
+    ; mov ah, 10001111b
+    ; mov al, 174
+    ; mov word [es:di], ax
+    ; mov di, 2948
+    ; mov al, 175
+    ; mov word [es:di], ax
     ;==================================;
 
     mov si, StringQuit
