@@ -2,6 +2,98 @@
 
 jmp startEnding
 
+TheGameHasEnded:
+    pushA
+
+    call UnhookCustomISR9ForNavigationOnBoard
+    
+    xor dx, dx
+    mov ax, 0
+
+    loopingClearingBoards:
+
+        mov si, NumbersForRow1
+        call enterValueAtBoard
+        mov si, SolutionNumbersForRow1
+        call enterValueAtBoard
+        mov si, NumbersUserCantEditForRow1
+        call enterValueAtBoard
+
+        inc dl
+        cmp dl, 9
+    jnz loopingClearingBoards
+
+        mov dl, 0
+        inc dh
+        cmp dh, 9
+    jnz loopingClearingBoards
+
+	
+    mov cl, 3           ; width of line
+    mov ch, 2
+
+        mov ax, 160
+        mov dx, 80
+
+        push word 320
+        push word 240
+        push word 0
+        push word ax
+        push word dx
+        call ClearABox
+
+loopVerticalPrintingInEndingGame:
+        push word 15        ; color
+        push ax
+        push dx
+        push word 240
+        call drawVertical
+
+            add ax, 1
+            dec cl
+            cmp cl ,0
+        jnz loopVerticalPrintingInEndingGame
+
+            add ax, 314
+            mov cl, 3
+            dec ch
+            cmp ch, 0
+
+        jnz loopVerticalPrintingInEndingGame
+
+
+    mov cl, 3       ; width of line 
+    mov ch, 2
+
+    mov ax, 160
+    mov dx, 80
+
+    loopHorizontalPrintingInEndingGame:
+
+            push word 15        ; color
+            push ax
+            push dx
+            push word 320
+            call drawHorizontal
+
+            add dx, 1
+            dec cl
+            cmp cl, 0
+        jnz loopHorizontalPrintingInEndingGame
+
+            add dx, 234
+            mov cl, 3
+            dec ch
+            cmp ch, 0
+        
+        jnz loopHorizontalPrintingInEndingGame
+
+			
+           ;==============================
+        
+
+    popA
+ret
 
 ; drawStarting:
 ;     pushA

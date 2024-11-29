@@ -318,6 +318,34 @@ DrawScoreCard:
 ret
 
 ;===============================================================================================================================================================================================;
+
+updateMistake:
+	pushA
+
+	mov ax, 50
+	mov bl, 16
+	div bl
+	mov dh, al
+	dec dh
+	mov ax, 145
+	mov bl, 8
+	div bl
+	mov dl, al
+	inc dl
+	mov bx, 0
+	mov ah, 02h
+	int 10h          ; settings cursor at given index
+	mov ah, 0x0e     ; setting for teletype output
+	mov bl, 15
+
+	mov  si, topOfBoardStart
+	call PrintString
+
+	popA
+
+ret
+
+;===============================================================================================================================================================================================;
 drawBoardTop: ; bp + 4 --- y, bp + 6 --- x, bp + 8 difficulty
 	push bp
 	mov  bp, sp

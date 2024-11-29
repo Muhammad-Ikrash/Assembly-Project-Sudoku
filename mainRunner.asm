@@ -2,14 +2,17 @@
 
 jmp start
 
-%include "E:\Sudoku\Bitmaps.asm"
-%include "E:\Sudoku\KeyBoardISR.asm"
-%include "E:\Sudoku\DrawMainScreen.asm"
-%include "E:\Sudoku\StartingScreen.asm"
-%include "E:\Sudoku\EndingScreen.asm"
-%include "E:\Sudoku\NavigationControls.asm"
+%include "Bitmaps.asm"
+%include "KeyBoardISR.asm"
+%include "DrawMainScreen.asm"
+%include "StartingScreen.asm"
+%include "EndingScreen.asm"
+%include "NavigationControls.asm"
 
 drawStartingScreen:
+
+	mov ax, 0x03
+	int 10h
 
 	call clrScreen
     call drawSudokuLogo
@@ -55,11 +58,34 @@ ret
 
 		call drawStartingScreen
 
+		; jmp $	
+
+	mainGameScreen:
+
 		call DrawTheMiddleScreen	
 
+		GameIsOngoing:
+			
+			cmp byte [topOfBoardStart + 10], 0x33
+			jnz NextCheckInGame
 
-    l:
-        jmp l
+				call TheGameHasEnded
+				jmp endScreen
+
+			NextCheckInGame:
+				
+				cmp word [ValuesLeftInIndexes], 0
+				jnz GameIsOngoing
+
+			jmp GameIsOngoing
+
+	endScreen:
+		
+		xor ax, ax
+		int 16h
+		
+		jmp start	
+
 
 		mov ax, 0x4c00
 	int 21h

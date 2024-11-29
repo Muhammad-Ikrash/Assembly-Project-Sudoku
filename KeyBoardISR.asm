@@ -209,7 +209,14 @@ validateAndPrintNumber:		; number in ax, dh -- row, dl -- col
 			call DrawNumberAtPosition
 			
 			; inc mistake here ==============================================;
+			inc byte [topOfBoardStart + 10]
 
+			call updateMistake
+
+			; cmp byte [topOfBoardStart + 10], 0x33
+			; jnz exitInputValidation
+
+			; 	call TheGameHasEnded
 
 			exitInputValidation:
 
@@ -241,6 +248,27 @@ HookcustomISRforINT9ForNavigationOnBoard:
     pop ax
 	pop es
 
+ret
+
+UnhookCustomISR9ForNavigationOnBoard:
+	push es
+	push ax
+	push dx
+
+	xor ax, ax
+	mov es, ax
+
+	cli 
+		mov ax, [OriginalISRforINT9]
+		mov [es: 9 * 4], ax
+		mov ax, [OriginalISRforINT9 + 2]
+		mov [es: 9 * 4 + 2], ax
+	sti
+
+
+	pop dx
+	pop ax
+	pop es
 ret
 
 saveOriginalKeyboardISR:

@@ -357,6 +357,10 @@ FillRandomBasedOnDifficulty:
 
         loop GenerateANumberAgain
 
+        mov word [ValuesLeftInIndexes], 81
+        mov ax, [ValueFromDifficulty]
+        sub word [ValuesLeftInIndexes], ax
+
     popA
 ret
 
