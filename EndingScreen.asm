@@ -28,6 +28,17 @@ TheGameHasEnded:
         cmp dh, 9
     jnz loopingClearingBoards
 
+    mov word [ValuesLeftInIndexes], 80  
+    mov byte [topOfBoardStart + 10], 0x30       ; mistakecount
+
+    mov cx, 9
+    mov bx, 0
+    
+    resettingTheFrequencies:
+        mov word [FrequencyArray + bx], 0
+        add bx,2 
+    loop resettingTheFrequencies
+    
 	
     mov cl, 3           ; width of line
     mov ch, 2
@@ -87,9 +98,6 @@ loopVerticalPrintingInEndingGame:
             cmp ch, 0
         
         jnz loopHorizontalPrintingInEndingGame
-
-			
-           ;==============================
         
 
     popA

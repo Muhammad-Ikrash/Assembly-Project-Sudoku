@@ -1,5 +1,7 @@
 [org 0x0100]
 
+call saveOriginalKeyboardISR
+
 jmp start
 
 %include "Bitmaps.asm"
@@ -28,7 +30,9 @@ DrawTheMiddleScreen:
 		int 10h
 
 		mov ax, [ValueFromDifficulty]
-
+		mov ax, [ValuesLeftInIndexes]
+		mov dl, [currentCol]
+		mov dh, [currentRow]
 		call GenerateRandomBoard
 		call FillRandomBasedOnDifficulty
 
@@ -51,16 +55,18 @@ DrawTheMiddleScreen:
 		call DrawBottomNumbers
 		call DrawScoreCard
 
-		call saveOriginalKeyboardISR
+		; call saveOriginalKeyboardISR
 		call HookcustomISRforINT9ForNavigationOnBoard
 
 ret
 
-	start:
+start:
+
+		; call DrawTheMiddleScreen
+		; call TheGameHasEnded
+		; call DrawTheMiddleScreen
 
 		call drawStartingScreen
-
-		; jmp $	
 
 	mainGameScreen:
 
