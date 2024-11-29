@@ -43,6 +43,8 @@ push dx
 push si
 push bx
 
+	cmp word [ValuesLeftInIndexes], 0
+	jz SkipTheFunctionDirectly
 	mov bl, al
 
 	forJumpingIfNumberIsNotEditable1:
@@ -114,6 +116,8 @@ push bx
 	call returnValueFromBoard
 	cmp ax, 1
 	jz forJumpingIfNumberIsNotEditable1
+
+	SkipTheFunctionDirectly:
 
 	call DrawNavigationBox
 

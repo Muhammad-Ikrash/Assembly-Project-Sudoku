@@ -27,6 +27,8 @@ DrawTheMiddleScreen:
 		mov ax, 0x12
 		int 10h
 
+		mov ax, [ValueFromDifficulty]
+
 		call GenerateRandomBoard
 		call FillRandomBasedOnDifficulty
 
@@ -67,19 +69,17 @@ ret
 		GameIsOngoing:
 			
 			cmp byte [topOfBoardStart + 10], 0x33
-			jnz NextCheckInGame
-
-				call TheGameHasEnded
-				jmp endScreen
+			jz endScreen
 
 			NextCheckInGame:
 				
 				cmp word [ValuesLeftInIndexes], 0
 				jnz GameIsOngoing
 
-			jmp GameIsOngoing
 
 	endScreen:
+
+		call TheGameHasEnded
 		
 		xor ax, ax
 		int 16h
