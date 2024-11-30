@@ -32,6 +32,8 @@ pushA
 		cmp al, 0x23			; Hint Key (H)
 		jnz itWasADirection
 
+			cmp byte [HintCount], 0
+			jz itWasANumber
 
 			dec byte [HintCount]
 
@@ -42,17 +44,11 @@ pushA
 
 			call validateAndPrintNumber
 
-		cmp byte [HintCount], 0
-		jnz itWasANumber
-		
-			push word ButtonsArray
-			push word [ButtonsXCoordinate]
-			push word [ButtonsYCoordinate + 6]
-			push word 32
-			push word 32
-			push word 4
-			push word 12		; color of the hint button when disabled 
-			call drawBitMap
+			cmp byte [HintCount], 0
+			jnz itWasAnAlphabet
+
+				call DisableHints
+
 
 	itWasADirection:
 
@@ -67,6 +63,19 @@ pushA
 
 	popA
 iret
+
+DisableHints:
+
+			push word ButtonsArray
+			push word [ButtonsXCoordinate]
+			push word [ButtonsYCoordinate + 6]
+			push word 32
+			push word 32
+			push word 4
+			push word 12		; color of the hint button when disabled 
+			call drawBitMap
+
+ret
 
 getToNextPossibleIndex:		; give the scan code of movement in al
 push ax
@@ -275,7 +284,8 @@ HookcustomISRforINT9ForNavigationOnBoard:
 		mov [es: 9 * 4 + 2],  cs
     sti
 
-	xor dx, dx
+	mov dh, [currentRow]
+	mov dl, [currentCol]
 	call DrawNavigationBox
 
 	pop dx

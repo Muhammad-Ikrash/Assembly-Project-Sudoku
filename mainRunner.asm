@@ -14,18 +14,22 @@ jmp start
 %include "NavigationControls.asm"
 %include "TimerISR.asm"
 %include "leftSideButtons.asm"
-
+%include "KeyBoardISRMainScreen.asm"
 drawStartingScreen:
 
 	mov ax, 0x03
 	int 10h
-
+	mov bx, 0xb800
+	mov es, bx
 	call clrScreen
-    call drawSudokuLogo
-    
     call drawStarting
-	xor ax, ax
-	int 16h
+    call drawSudokuLogo
+	; mov word[es:2948], 0x0F20
+    ; mov word[es:2970], 0x0F20
+    ; mov word[es:3272], 0x8FAF
+    ; mov word[es:3282], 0x8FAE
+	call hookCustomISRINT9ForMainScreen
+    
 
 ret
 
@@ -51,17 +55,6 @@ DrawTheMiddleScreen:
 		call drawBoardTop
 
 		call drawNumbersInGrid
-		; call drawNotes
-		;=====================
-
-			; mov dl, 0
-			; mov dh, 0
-			; mov cx, 1
-			; call setNotes
-			
-			; call eraseNotesAtIndex
-		;===================
-
 		
 		call DrawLeftSideButtons
 		call DrawRightSideButton
@@ -70,11 +63,17 @@ DrawTheMiddleScreen:
 
 		call HookcustomISRforINT9ForNavigationOnBoard
 		call HookTimerISR	
-ret
+ret	
 
 start:
 
 		call drawStartingScreen
+
+	StartingScreenLoop:
+		
+		cmp byte [modeSelection], 2
+		jz exitTheGame
+		jmp StartingScreenLoop
 
 	mainGameScreen:
 
@@ -100,6 +99,7 @@ start:
 		
 		jmp start	
 
+		exitTheGame:
 
 		mov ax, 0x4c00
 	int 21h

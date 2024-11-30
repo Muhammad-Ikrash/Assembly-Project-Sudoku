@@ -17,6 +17,30 @@ pop es
 pop ax
 ret
 
+drawNotesIcon:              ; when its enabled
+pushA
+
+
+
+popA
+ret
+
+eraseNotesFromBox:          ; pass dx (row / col)
+pushA
+    call pixelCalculatorFromIndex
+    add ax,1
+    add dx, 1
+    
+    push word 36
+    push word 36
+    push word 0
+    push ax
+    push dx
+    call ClearABox
+
+popA
+ret
+
 customISRforINT9ForNotes:
     pushA
     in al, 0x60
@@ -30,10 +54,10 @@ customISRforINT9ForNotes:
     	CheckingInputNumberForNotes:
 
 		cmp al, 1
-		jle exitEnteringNotes			
+		jle checkForErase			
 
 		cmp al, 0x0b
-		jge exitEnteringNotes			
+		jge checkForErase			
 
 		mov dh, [currentRow]
 		mov dl, [currentCol]
@@ -44,6 +68,13 @@ customISRforINT9ForNotes:
 
         call setNotes
 
+    checkForErase:
+        cmp al, 0x12
+        jnz exitEnteringNotes
+
+            mov dh, [currentRow]
+            mov dl, [currentCol]
+            call eraseNotesFromBox
 	
     exitEnteringNotes:
         mov al, 0x20
