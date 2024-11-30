@@ -44,7 +44,6 @@ push               ax ; will use late to retrieve value
     pop                  bx
 ret
 
-
 IsInsertibleAtIndex:    ; dh --- row, dl --- col, cx --- number to check, will return 1 in ax if it is insertable           push array to use in bp + 4
     push bp
     mov  bp, sp
@@ -300,7 +299,7 @@ IndexRestore :  db           0, 0,  0, 1,  0, 2,  0, 3,  0, 4,  0, 5,  0, 6,  0,
         db                   7, 0,  7, 1,  7, 2,  7, 3,  7, 4,  7, 5,  7, 6,  7, 7,  7, 8
         db                   8, 0,  8, 1,  8, 2,  8, 3,  8, 4,  8, 5,  8, 6,  8, 7,  8, 8
 
-ValueFromDifficulty: dw 50
+ValueFromDifficulty: dw 20
 ValuesLeftInIndexes: dw 80
 
 FillRandomBasedOnDifficulty:

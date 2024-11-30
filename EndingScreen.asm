@@ -6,6 +6,7 @@ TheGameHasEnded:
     pushA
 
     call UnhookCustomISR9ForNavigationOnBoard
+    call UnhookTimerISR
     
     xor dx, dx
     mov ax, 0
@@ -30,7 +31,11 @@ TheGameHasEnded:
 
     mov word [ValuesLeftInIndexes], 80  
     mov byte [topOfBoardStart + 10], 0x30       ; mistakecount
-
+    mov byte [TimerCount], 0x30
+    mov byte [TimerCount + 2], 0x30
+    mov byte [TimerCount + 3], 0x30
+    mov byte [HintCount], 3
+    
     mov cx, 9
     mov bx, 0
     

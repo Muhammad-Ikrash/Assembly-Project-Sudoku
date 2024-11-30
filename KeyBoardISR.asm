@@ -7,13 +7,18 @@ pushA
 	in al, 0x60
 	mov bl, al
 
+	cmp al, 0x31
+	jnz CheckingInput
+
+		call hookcustomISRforINT9ForNotes
+
 	CheckingInput:
 
 		cmp al, 1
-		jle itWasADirection			
+		jle itWasAnAlphabet			
 
 		cmp al, 0x0b
-		jge itWasADirection			
+		jge itWasAnAlphabet			
 
 		mov dh, [currentRow]
 		mov dl, [currentCol]
@@ -22,6 +27,32 @@ pushA
 		call validateAndPrintNumber
 
 	jmp itWasANumber	
+
+	itWasAnAlphabet:	
+		cmp al, 0x23			; Hint Key (H)
+		jnz itWasADirection
+
+
+			dec byte [HintCount]
+
+			mov dh, [currentRow]
+			mov dl, [currentCol]
+			mov si, SolutionNumbersForRow1
+			call returnValueFromBoard
+
+			call validateAndPrintNumber
+
+		cmp byte [HintCount], 0
+		jnz itWasANumber
+		
+			push word ButtonsArray
+			push word [ButtonsXCoordinate]
+			push word [ButtonsYCoordinate + 6]
+			push word 32
+			push word 32
+			push word 4
+			push word 12		; color of the hint button when disabled 
+			call drawBitMap
 
 	itWasADirection:
 
@@ -180,7 +211,7 @@ validateAndPrintNumber:		; number in ax, dh -- row, dl -- col
 	push bx
 
 		mov si, SolutionNumbersForRow1
-		push ax
+		push ax			; saving the number passed 
 		call returnValueFromBoard
 
 		pop bx
@@ -198,9 +229,12 @@ validateAndPrintNumber:		; number in ax, dh -- row, dl -- col
 
 			mov dx, [bp - 2]
 
+
 			mov si, NumbersUserCantEditForRow1
 			mov ax, 1
 			call enterValueAtBoard
+
+			call ScoreCalculate
 
 			mov al, 0x4d
 			call getToNextPossibleIndex
@@ -217,13 +251,9 @@ validateAndPrintNumber:		; number in ax, dh -- row, dl -- col
 
 			call updateMistake
 
-			; cmp byte [topOfBoardStart + 10], 0x33
-			; jnz exitInputValidation
-
-			; 	call TheGameHasEnded
-
-			exitInputValidation:
-
+		exitInputValidation:
+			
+			
 	pop bx
 	pop dx
 	pop ax
