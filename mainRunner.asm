@@ -24,10 +24,7 @@ drawStartingScreen:
 	call clrScreen
     call drawStarting
     call drawSudokuLogo
-	; mov word[es:2948], 0x0F20
-    ; mov word[es:2970], 0x0F20
-    ; mov word[es:3272], 0x8FAF
-    ; mov word[es:3282], 0x8FAE
+
 	call hookCustomISRINT9ForMainScreen
     
 
@@ -49,7 +46,7 @@ DrawTheMiddleScreen:
 		push word 36  ;	size
 		call DrawGrid
 		
-		push word 0
+		push word [modeSelection]
 		push word 145	
 		push word 50
 		call drawBoardTop
@@ -72,13 +69,27 @@ start:
 	StartingScreenLoop:
 		
 		cmp byte [modeSelection], 2
-		jz exitTheGame
+			jz exitTheGame
+		
+		cmp byte [modeSelection], 1
+			jz difficultySelectionScreen
+
 		jmp StartingScreenLoop
+
+	difficultySelectionScreen:
+
+		call drawDifficultyScreen
+		call hookKeyBoardISRDifficultySelection
+	difficultyScreenLoop:
+
+		cmp byte [modeSelection], 0
+		jz difficultyScreenLoop
 
 	mainGameScreen:
 
 		call DrawTheMiddleScreen	
-			
+
+	
 		GameIsOngoing:
 			
 			cmp byte [topOfBoardStart + 10], 0x33
@@ -88,7 +99,6 @@ start:
 				
 				cmp word [ValuesLeftInIndexes], 0
 				jnz GameIsOngoing
-
 
 	endScreen:
 
@@ -100,6 +110,10 @@ start:
 		jmp start	
 
 		exitTheGame:
-
+		
+			call clrScreen
+			call UnhookCustomISR9ForNavigationOnBoard
+			call UnhookTimerISR
+		
 		mov ax, 0x4c00
 	int 21h

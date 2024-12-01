@@ -196,6 +196,8 @@ drawBoardTop: ; bp + 4 --- y, bp + 6 --- x, bp + 8 difficulty
 
 	
 	mov  si, [bp + 8]
+	dec si
+	add si, si
 	mov  si, [topOfBoardDifficulty + si]
 	call findlength1
 	shr  cx, 1

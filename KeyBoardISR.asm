@@ -288,6 +288,16 @@ HookcustomISRforINT9ForNavigationOnBoard:
 	mov dl, [currentCol]
 	call DrawNavigationBox
 
+	push word ButtonsArray
+    push word [ButtonsXCoordinate]
+    push word [ButtonsYCoordinate + 4]
+    push word 32
+    push word 32
+    push word 3
+    push word 15
+    call drawBitMap
+
+
 	pop dx
     pop ax
 	pop es

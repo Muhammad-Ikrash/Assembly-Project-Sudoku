@@ -1,9 +1,37 @@
 [org 0x0100]
 jmp startNotes
 
+notesStackX:      times 81  * 9 db 0 
+notesStackY:   times 81  * 9 db 0 
+notesStackNumber: times 81  * 9 db 0 
+currentValuesInStack: dw 0
+
+UndoButtonFunc:
+pushA
+
+    cmp word [currentValuesInStack], 0
+    jz exitUndoButton
+
+        dec word [currentValuesInStack]
+        mov di, [currentValuesInStack]
+
+        mov dl, [notesStackX + di]
+        mov dh, [notesStackY + di]
+        mov cl, [notesStackNumber + di]
+        mov si, NumbersUserCantEditForRow1
+        call returnValueFromBoard
+        cmp ax, 1
+        jz exitUndoButton 
+            
+            call eraseNotesAtIndex
+
+    exitUndoButton:
+popA
+ret
+
 hookcustomISRforINT9ForNotes:
 push ax
-push es
+push es    
 
 cli 
 
@@ -13,16 +41,18 @@ cli
     mov word [es:9 * 4 + 2], cs
 
 sti
+
+    push word ButtonsArray
+    push word [ButtonsXCoordinate]
+    push word [ButtonsYCoordinate + 4]
+    push word 32
+    push word 32
+    push word 3
+    push word 11
+    call drawBitMap
+
 pop es
 pop ax
-ret
-
-drawNotesIcon:              ; when its enabled
-pushA
-
-
-
-popA
 ret
 
 eraseNotesFromBox:          ; pass dx (row / col)
@@ -44,6 +74,13 @@ ret
 customISRforINT9ForNotes:
     pushA
     in al, 0x60
+
+        cmp al, 0x16
+        jnz checkingInputForHint
+
+            call UndoButtonFunc
+
+    checkingInputForHint:
 
         cmp al, 0x31
         jnz CheckingInputNumberForNotes
@@ -82,6 +119,16 @@ customISRforINT9ForNotes:
     popA
 iret
 
+EnterValueInStack:
+pushA
+
+    mov di, [currentValuesInStack]
+    mov [notesStackX + di], dl
+    mov [notesStackY + di], dh
+    mov [notesStackNumber + di], cl
+    inc word [currentValuesInStack]
+popA
+ret
 
 ValuestoAddInNotesPixel: dw 3, 3, 3, 14, 3, 25, 14, 3, 14, 14, 14, 25, 25, 3, 25, 14, 25 ,25
 
@@ -89,6 +136,8 @@ setNotes:       ; pass dx (row/col), cx -- val
 pushA    
 push cx
     
+    call EnterValueInStack
+
     call pixelCalculatorFromIndex
 
     add ax, 1
@@ -116,7 +165,7 @@ push cx
 popA
 ret
 
-eraseNotesAtIndex:
+eraseNotesAtIndex:              ; value in cx, dx -- row / col
 pushA
 push cx
     
