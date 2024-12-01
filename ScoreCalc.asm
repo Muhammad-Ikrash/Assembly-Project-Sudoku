@@ -91,25 +91,25 @@ push cx
         mov ch, al
 
         mov bx, cx
+        mov dx, cx
         add bl, 3
         add bh, 3
 
-        mov cx, dx
 
-        mov si, NumbersUserCantEditForRow1
     loopingBoxCompletionCheck:
+        mov si, NumbersUserCantEditForRow1
         call returnValueFromBoard
 
         cmp ax, 0
-        jnz BoxisNotComplete
+        jz BoxisNotComplete
 
             inc dl
-            cmp dl, 9
+            cmp dl, bl
             jnz loopingBoxCompletionCheck
 
                 inc dh
-                mov dl, 0
-                cmp dh, 9
+                sub dl, 3
+                cmp dh, bh
                 jnz loopingBoxCompletionCheck
 
         mov ax, 1

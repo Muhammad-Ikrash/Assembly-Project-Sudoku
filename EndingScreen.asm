@@ -107,6 +107,7 @@ loopVerticalPrintingInEndingGame:
         add bx,2 
     loop resettingTheFrequencies
     
+    mov word [Score], 0
 
     popA
 ret
