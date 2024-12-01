@@ -19,6 +19,10 @@ RowCompletion:      ; will pass dx -- row/col
         jnz loopingRowCompletionCheckInScore
 
         mov ax, 1
+
+        call playCompletionSound
+
+
         jmp exitRowCompletionInScore
 
     RowIsNotCompleteInScore:
@@ -48,6 +52,9 @@ ColCompletion:      ; will pass dx -- row/col
         jnz loopingColCompletionCheck
 
         mov ax, 1
+
+        call playCompletionSound
+
         jmp exitColCompletion
 
     ColIsNotComplete:
@@ -106,6 +113,8 @@ push cx
                 jnz loopingBoxCompletionCheck
 
         mov ax, 1
+
+        call playCompletionSound
 
         jmp exitBoxCompletionCheck
 

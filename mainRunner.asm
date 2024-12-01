@@ -4,6 +4,7 @@ call saveOriginalKeyboardISR
 call saveOriginalTimerISR
 jmp start
 
+%include "sound.asm"
 %include "notes.asm"
 %include "Bitmaps.asm"
 %include "KeyBoardISR.asm"
